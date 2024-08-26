@@ -5,26 +5,41 @@ public class TileGrid : MonoBehaviour
     public TileRow[] rows { get; private set; }
     public TileCell[] cells { get; private set; }
 
-    public int size => cells.Length;
-    public int height => rows.Length;
-    public int width => size / height;
-
+    public int Size => cells.Length;
+    public int Height => rows.Length;
+    public int Width => Size / Height;
 
     private void Awake()
     {
         rows = GetComponentsInChildren<TileRow>();
         cells = GetComponentsInChildren<TileCell>();
+
+        for (int i = 0; i < cells.Length; i++) {
+            cells[i].coordinates = new Vector2Int(i % Width, i / Width);
+        }
     }
 
-    private void Start()
+    public TileCell GetCell(Vector2Int coordinates)
     {
-        for (int y = 0; y < rows.Length; y++)
-        {
-            for (int x = 0; x < rows[x].cells.Length; x++)
-            {
-                rows[y].cells[x].coordinates = new Vector2Int(x, y);
-            }
+        return GetCell(coordinates.x, coordinates.y);
+    }
+
+    public TileCell GetCell(int x, int y)
+    {
+        if (x >= 0 && x < Width && y >= 0 && y < Height) {
+            return rows[y].cells[x];
+        } else {
+            return null;
         }
+    }
+
+    public TileCell GetAdjacentCell(TileCell cell, Vector2Int direction)
+    {
+        Vector2Int coordinates = cell.coordinates;
+        coordinates.x += direction.x;
+        coordinates.y -= direction.y;
+
+        return GetCell(coordinates);
     }
 
     public TileCell GetRandomEmptyCell()
@@ -32,21 +47,21 @@ public class TileGrid : MonoBehaviour
         int index = Random.Range(0, cells.Length);
         int startingIndex = index;
 
-        while (cells[index].occupied)
+        while (cells[index].Occupied)
         {
             index++;
 
-            if (index >= cells.Length)
-            {
+            if (index >= cells.Length) {
                 index = 0;
             }
-            if (index == startingIndex)
-            {
+
+            // all cells are occupied
+            if (index == startingIndex) {
                 return null;
             }
-
         }
 
         return cells[index];
     }
+
 }

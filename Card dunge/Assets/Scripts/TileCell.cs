@@ -1,12 +1,11 @@
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class TileCell : MonoBehaviour
 {
     public Vector2Int coordinates { get; set; }
-    public Tile tile {get; set;}
+    public Tile Tile {get; set;}
 
-    public bool empty => tile == null;
-    public bool occupied => tile != null;
+    public bool Epty => Tile == null;
+    public bool Occupied => Tile != null;
     
 }
