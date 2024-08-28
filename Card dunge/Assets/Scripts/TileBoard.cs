@@ -5,8 +5,11 @@ using UnityEngine;
 
 public class TileBoard : MonoBehaviour
 {
+    public GameManager gameManager;
     public Tile tilePrefab;
     public TileState[] tileStates;
+
+    private Tile mainTile;
 
     private TileGrid grid;
     private List<Tile> tiles;
@@ -15,24 +18,33 @@ public class TileBoard : MonoBehaviour
 
     private bool waiting;
 
+
     private void Awake()
     {
         grid = GetComponentInChildren<TileGrid>();
         tiles = new List<Tile>(9);
     }
 
-    private void Start()
+    public void ClearBoard()
     {
-        CreateTile();
-        CreateTile();
+        foreach (var cell in grid.cells)
+        {
+            cell.Tile = null;
+        }
+        foreach (var tile in tiles)
+        {
+            Destroy(tile.gameObject);
+        }
+        tiles.Clear();
     }
 
-    private void CreateTile()
+    public void CreateTile()
     {
         Tile tile = Instantiate(tilePrefab, grid.transform);
         if (!tiles.Any())
         {
             tile.SetState(tileStates[0], 20);
+            mainTile = tile;
         }
         else
         {
@@ -116,12 +128,13 @@ public class TileBoard : MonoBehaviour
 
                 if (cell.Occupied)
                 {
-                   changed |= MoveTile(cell.Tile, direction);
+                    changed |= MoveTile(cell.Tile, direction);
                 }
             }
 
         }
-        if (changed){
+        if (changed)
+        {
             StartCoroutine(WaitForChanges());
         }
     }
@@ -140,6 +153,7 @@ public class TileBoard : MonoBehaviour
         }
 
         b.SetState(tileStates[0], number);
+        mainTile = b;
     }
 
     private bool MoveTile(Tile tile, Vector2Int direction)
@@ -179,6 +193,11 @@ public class TileBoard : MonoBehaviour
         {
             CreateTile();
         }
+
+        if (CheckForGameOver())
+        {
+            gameManager.GameOver();
+        }
     }
 
     private int IndexOf(TileState state)
@@ -191,5 +210,14 @@ public class TileBoard : MonoBehaviour
             }
         }
         return -1;
+    }
+
+    private bool CheckForGameOver()
+    {
+        if (mainTile != null && mainTile.number <= 0)
+        {
+            return true;
+        }
+        return false;
     }
 }
